@@ -7,63 +7,20 @@ import plotly.graph_objects as go
 import os
 import platform
 
-
-# Set wide layout and collapse sidebar
 st.set_page_config(page_title="AsmStat Pro", layout="wide", initial_sidebar_state="collapsed")
-
-# Custom CSS to massively increase font sizes and make the UI look premium
-st.markdown("""
-<style>
-    /* Global Text Scaling */
-    html, body, [class*="css"] {
-        font-size: 20px !important;
-    }
-    
-    /* Titles */
-    .main-title { font-size: 60px !important; font-weight: 900; color: #FFFFFF; margin-bottom: 0px;}
-    .sub-title { font-size: 28px !important; color: #A0AEC0; margin-bottom: 30px;}
-    h3 { font-size: 32px !important; font-weight: bold !important; padding-top: 1rem !important; }
-    h4 { font-size: 26px !important; font-weight: bold !important; }
-    
-    /* Inputs & Selectboxes */
-    .stTextInput > div > div > input { font-size: 28px !important; padding: 20px !important; font-weight: bold; text-align: center;}
-    .stSelectbox label, .stFileUploader label { font-size: 22px !important; font-weight: bold !important; color: #E2E8F0 !important;}
-    .stSelectbox div[data-baseweb="select"] { font-size: 22px !important; }
-    
-    /* Tabs */
-    .stTabs [data-baseweb="tab-list"] button { font-size: 26px !important; font-weight: bold !important; padding: 15px 30px !important; }
-    
-    /* Dataframes / Tables */
-    .stDataFrame { font-size: 20px !important; }
-    [data-testid="stDataFrame"] div { font-size: 18px !important; }
-    
-    /* Metric Cards */
-    .metric-box { background-color: #1E1E1E; padding: 30px; border-radius: 15px; text-align: center; border: 1px solid #333; box-shadow: 0 4px 6px rgba(0,0,0,0.3); margin-top: 20px;}
-    .metric-value { font-size: 55px !important; font-weight: 900; color: #4FD1C5; margin: 0; }
-    .metric-label { font-size: 24px !important; font-weight: 700; color: #E2E8F0; text-transform: uppercase; letter-spacing: 2px;}
-    
-    /* General text */
-    p { font-size: 22px !important; }
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown("<p class='main-title'>🚀 AsmStat Pro Max</p>", unsafe_allow_html=True)
-st.markdown("<p class='sub-title'>High-Performance Statistical Engine: 100% 64-bit Assembly Backend</p>", unsafe_allow_html=True)
-
-# --- Load the Assembly DLL ---
 
 @st.cache_resource
 def load_asm_library():
     base_dir = os.path.dirname(__file__)
     if platform.system() == "Windows":
-        dll_path = os.path.join(base_dir, "math.dll")
+        lib_path = os.path.join(base_dir, "math.dll")
     else:
-        dll_path = os.path.join(base_dir, "libmath.so")
+        lib_path = os.path.join(base_dir, "libmath.so")
 
-    if not os.path.exists(dll_path):
+    if not os.path.exists(lib_path):
         return None
     try:
-        lib = ctypes.CDLL(dll_path)
+        lib = ctypes.CDLL(lib_path)
 
         # Wire up functions
         for func_name in ['asm_sum', 'asm_mean', 'asm_variance', 'asm_min', 'asm_max']:
@@ -86,12 +43,12 @@ def load_asm_library():
         st.error(f"Error loading library: {e}")
         return None
 
-
 asm_lib = load_asm_library()
 
 if asm_lib is None:
-    st.error("⚠️ `math.dll` not found. Please run `build.bat` to compile the Assembly code first!")
+    st.error("⚠️ Assembly library not found. On Windows: run build.bat → math.dll. On Linux: postBuild builds libmath.so.")
     st.stop()
+
 
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 CLI_SYNC_FILE = r"D:\ASMSTAT.TXT"
