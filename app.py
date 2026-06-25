@@ -49,29 +49,25 @@ st.markdown("<p class='main-title'>🚀 AsmStat Pro Max</p>", unsafe_allow_html=
 st.markdown("<p class='sub-title'>High-Performance Statistical Engine: 100% 64-bit Assembly Backend</p>", unsafe_allow_html=True)
 
 # --- Load the Assembly DLL ---
+
 @st.cache_resource
 def load_asm_library():
-    dll_path = os.path.join(os.path.dirname(__file__), "math.dll")
+    base_dir = os.path.dirname(__file__)
+    if platform.system() == "Windows":
+        dll_path = os.path.join(base_dir, "math.dll")
+    else:
+        dll_path = os.path.join(base_dir, "libmath.so")
+
     if not os.path.exists(dll_path):
         return None
     try:
         lib = ctypes.CDLL(dll_path)
-        for func_name in ['asm_sum', 'asm_mean', 'asm_variance', 'asm_min', 'asm_max']:
-            func = getattr(lib, func_name)
-            func.argtypes = [ctypes.POINTER(ctypes.c_longlong), ctypes.c_longlong]
-            func.restype = ctypes.c_longlong
-            
-        # New functions
-        lib.asm_stddev.argtypes = [ctypes.POINTER(ctypes.c_longlong), ctypes.c_longlong]
-        lib.asm_stddev.restype = ctypes.c_double
-        
-        lib.asm_dot_product.argtypes = [ctypes.POINTER(ctypes.c_longlong), ctypes.POINTER(ctypes.c_longlong), ctypes.c_longlong]
-        lib.asm_dot_product.restype = ctypes.c_longlong
-        
+        # set argtypes/restype for functions here...
         return lib
     except Exception as e:
-        st.error(f"Error loading DLL: {e}")
+        st.error(f"Error loading library: {e}")
         return None
+
 
 asm_lib = load_asm_library()
 
