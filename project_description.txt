@@ -1,0 +1,54 @@
+AsmStat - Dual Architecture Statistical Engine
+==============================================
+
+Project Overview
+----------------
+AsmStat is a comprehensive dual-architecture statistical engine that bridges the gap between low-level hardware programming and modern, interactive web interfaces. This project demonstrates proficiency in both modern 64-bit Assembly integrated with Python, as well as retro 16-bit DOS Assembly using EMU8086. It showcases a deep understanding of computer architecture, ABI (Application Binary Interface), memory management, and full-stack integration.
+
+The project is split into two distinct parts:
+
+Part 1: AsmStat Pro Max (Modern 64-bit & Python Web App)
+--------------------------------------------------------
+The modern iteration utilizes a high-performance 64-bit Assembly backend combined with a beautiful Python Streamlit frontend.
+
+Key Features:
+- 64-bit NASM Backend (`math.asm`): Core statistical operations (Sum, Mean, Variance, Min, Max) written in pure 64-bit x86-64 assembly using the Microsoft x64 Calling Convention.
+- Python Integration (`app.py`): Uses Python's `ctypes` library to seamlessly load the Assembly DLL and execute native machine code directly from the web app.
+- Interactive UI: Built with Streamlit, featuring a massive, premium dark-mode interface.
+- Data Visualization: Integrates `plotly`, `matplotlib`, and `pandas` to dynamically generate Bar Charts, Trend Lines, Box Plots, and Histograms based on the Assembly engine's output.
+
+How to Run (Part 1):
+1. Prerequisites: Ensure you have NASM and GCC installed (or MSVC).
+2. Compile Assembly Code: Run the build script `build.bat` to compile the `math.asm` code into a shared library (`math.dll`).
+   Command: `build.bat`
+   (This executes NASM and GCC under the hood).
+3. Install Dependencies: Install the required Python packages.
+   Command: `pip install -r requirements.txt`
+   Dependencies include: streamlit, numpy, matplotlib, pandas, plotly.
+4. Launch the App: Run the Streamlit web application.
+   Command: `streamlit run app.py`
+
+Part 2: AsmStat Classic (16-bit EMU8086 Edition)
+------------------------------------------------
+The retro iteration of the project is a standalone, interactive Command Line Interface (CLI) application written entirely in 16-bit DOS Assembly for the EMU8086 emulator.
+
+Key Features:
+- Pure 16-bit Environment (`AsmStat.asm`): Uses legacy 16-bit registers (AX, BX, CX) and DOS interrupts.
+- VGA Memory Mapping: Directly writes to the VGA video memory (0B800h) to colorize the ASCII art and terminal interface without external libraries.
+- Dynamic Array Handling: Allows the user to dynamically input array lengths and elements, manipulating memory pointers (SI, DI) in real-time.
+- In-Place Sorting: Implements an O(N²) Bubble Sort algorithm purely in Assembly to enable Median calculations.
+- Standalone CLI: A massive, interactive ASCII menu driven by keyboard interrupts (int 16h).
+
+How to Run (Part 2):
+1. Open the EMU8086 IDE.
+2. Load the `AsmStat.asm` file into the editor.
+3. Click the "Emulate" button.
+4. Click "Run" in the emulator window.
+5. Use the keyboard to navigate the colored menu and perform statistical calculations.
+
+Educational Value & Technical Achievements
+------------------------------------------
+- Cross-Architecture Expertise: Demonstrates differences between 16-bit segmented real mode and modern 64-bit flat memory models.
+- Foreign Function Interfaces (FFI): Interfacing Python with low-level machine code via DLLs and ctypes.
+- Algorithmic Implementation: Translating complex algorithms (Bubble Sort, Variance) directly into CPU instructions.
+- Hardware Interaction: Using software interrupts to communicate directly with BIOS/DOS for screen rendering and input capture.
