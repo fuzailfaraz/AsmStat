@@ -5,6 +5,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import os
+import platform
+
 
 # Set wide layout and collapse sidebar
 st.set_page_config(page_title="AsmStat Pro", layout="wide", initial_sidebar_state="collapsed")
@@ -62,7 +64,23 @@ def load_asm_library():
         return None
     try:
         lib = ctypes.CDLL(dll_path)
-        # set argtypes/restype for functions here...
+
+        # Wire up functions
+        for func_name in ['asm_sum', 'asm_mean', 'asm_variance', 'asm_min', 'asm_max']:
+            func = getattr(lib, func_name)
+            func.argtypes = [ctypes.POINTER(ctypes.c_longlong), ctypes.c_longlong]
+            func.restype = ctypes.c_longlong
+
+        lib.asm_stddev.argtypes = [ctypes.POINTER(ctypes.c_longlong), ctypes.c_longlong]
+        lib.asm_stddev.restype = ctypes.c_double
+
+        lib.asm_dot_product.argtypes = [
+            ctypes.POINTER(ctypes.c_longlong),
+            ctypes.POINTER(ctypes.c_longlong),
+            ctypes.c_longlong
+        ]
+        lib.asm_dot_product.restype = ctypes.c_longlong
+
         return lib
     except Exception as e:
         st.error(f"Error loading library: {e}")
