@@ -601,7 +601,8 @@ if arr is not None and length > 0:
             # Simple Moving Average (window=min(5, length//5))
             window = max(2, min(10, length // 5))
             sma = pd.Series(arr).rolling(window=window).mean().values
-            fig_ts2 = px.line(x=list(range(length)), y=arr, title=f"Value Trend with {window}-Point Moving Average", opacity=0.5)
+            fig_ts2 = px.line(x=list(range(length)), y=arr, title=f"Value Trend with {window}-Point Moving Average")
+            fig_ts2.update_traces(opacity=0.5)
             fig_ts2.add_scatter(x=list(range(length)), y=sma, mode='lines', name=f'{window}-pt SMA', line=dict(color='yellow', width=3))
             fig_ts2.update_layout(xaxis_title="Index", yaxis_title="Value", template="plotly_dark", height=400, showlegend=False)
             st.plotly_chart(fig_ts2, use_container_width=True)
