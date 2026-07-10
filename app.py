@@ -176,6 +176,7 @@ tab_cli, tab1, tab2 = st.tabs(["🖥️ CLI Sync", "📝 Manual Input", "📂 CS
 manual_arr = None
 csv_arr = None
 uploaded_file = None
+df = None
 
 with tab_cli:
     st.markdown("### 🔗 Auto-Sync from EMU8086 CLI")
@@ -349,3 +350,103 @@ if arr is not None and length > 0:
         st.plotly_chart(fig4, use_container_width=True)
     else:
         st.info("Standard Deviation is 0, so Z-Scores are undefined.")
+
+    # Row 4: Advanced Distributions
+    st.markdown("### 🔬 Advanced Distribution Analysis")
+    g_col5, g_col6 = st.columns(2)
+    with g_col5:
+        # Violin Plot
+        fig5 = px.violin(y=arr, box=True, points="all", title="Violin Plot (Density & Spread)")
+        fig5.update_traces(marker_color='#38b2ac')
+        fig5.update_layout(yaxis_title="Value", template="plotly_dark", height=400)
+        st.plotly_chart(fig5, use_container_width=True)
+        
+    with g_col6:
+        # ECDF Plot (Empirical Cumulative Distribution Function)
+        fig6 = px.ecdf(x=arr, title="Empirical Cumulative Distribution (ECDF)")
+        fig6.update_traces(line_color='#e53e3e', line_width=3)
+        fig6.update_layout(xaxis_title="Value", yaxis_title="Probability", template="plotly_dark", height=400)
+        st.plotly_chart(fig6, use_container_width=True)
+
+    # Row 5: Advanced Outlier Detection (IQR)
+    st.markdown("### 🚨 Outlier Detection (IQR Method)")
+    Q1 = np.percentile(arr, 25)
+    Q3 = np.percentile(arr, 75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    outliers = arr[(arr < lower_bound) | (arr > upper_bound)]
+    
+    col_out1, col_out2 = st.columns([1, 2])
+    with col_out1:
+        st.info(f"**Q1 (25%)**: {Q1:.2f}\n\n**Q3 (75%)**: {Q3:.2f}\n\n**IQR**: {IQR:.2f}")
+        if len(outliers) > 0:
+            st.warning(f"Found **{len(outliers)}** outliers out of {length} points.")
+        else:
+            st.success("No significant outliers detected.")
+    with col_out2:
+        if len(outliers) > 0:
+            outlier_indices = np.where((arr < lower_bound) | (arr > upper_bound))[0]
+            fig_out = px.scatter(x=outlier_indices, y=outliers, title="Detected Outliers", color_discrete_sequence=['red'])
+            fig_out.update_traces(marker=dict(size=10, symbol='x'))
+            fig_out.update_layout(xaxis_title="Original Array Index", yaxis_title="Outlier Value", template="plotly_dark", height=300)
+            st.plotly_chart(fig_out, use_container_width=True)
+        else:
+            st.success("The dataset contains no extreme values based on the 1.5 * IQR rule. ✨")
+
+    # Row 6: Time-Series / Rolling Analysis (if dataset is large enough)
+    if length > 5:
+        st.markdown("### 🎢 Sequential & Rolling Analysis")
+        ts_col1, ts_col2 = st.columns(2)
+        with ts_col1:
+            # Cumulative Sum
+            cumsum_arr = np.cumsum(arr)
+            fig_ts1 = px.line(x=list(range(length)), y=cumsum_arr, title="Cumulative Sum Over Index")
+            fig_ts1.update_traces(line_color='#d69e2e')
+            fig_ts1.update_layout(xaxis_title="Index", yaxis_title="Cumulative Sum", template="plotly_dark", height=400)
+            st.plotly_chart(fig_ts1, use_container_width=True)
+        with ts_col2:
+            # Simple Moving Average (window=min(5, length//5))
+            window = max(2, min(10, length // 5))
+            sma = pd.Series(arr).rolling(window=window).mean().values
+            fig_ts2 = px.line(x=list(range(length)), y=arr, title=f"Value Trend with {window}-Point Moving Average", opacity=0.5)
+            fig_ts2.add_scatter(x=list(range(length)), y=sma, mode='lines', name=f'{window}-pt SMA', line=dict(color='yellow', width=3))
+            fig_ts2.update_layout(xaxis_title="Index", yaxis_title="Value", template="plotly_dark", height=400, showlegend=False)
+            st.plotly_chart(fig_ts2, use_container_width=True)
+
+if df is not None:
+    st.markdown("<br><hr>", unsafe_allow_html=True)
+    st.markdown("## 🌐 Full Dataset Exploratory Data Analysis (EDA)")
+    
+    # Show dataset shape and head
+    st.markdown(f"**Dataset Shape:** `{df.shape[0]} Rows` × `{df.shape[1]} Columns`")
+    with st.expander("View Raw Dataset Statistics", expanded=False):
+        st.dataframe(df.describe(), use_container_width=True)
+    
+    st.markdown("### 🧩 Missing Values Analysis")
+    missing = df.isnull().sum()
+    missing = missing[missing > 0]
+    if not missing.empty:
+        fig_missing = px.bar(x=missing.index, y=missing.values, title="Missing Values per Column", labels={'x': 'Column', 'y': 'Missing Count'})
+        fig_missing.update_traces(marker_color='#d69e2e')
+        fig_missing.update_layout(template="plotly_dark", height=400)
+        st.plotly_chart(fig_missing, use_container_width=True)
+    else:
+        st.success("No missing values found in the uploaded dataset! ✨")
+
+    st.markdown("### 🧮 Numeric Feature Correlation")
+    numeric_df = df.select_dtypes(include=np.number)
+    if len(numeric_df.columns) > 1:
+        corr = numeric_df.corr()
+        fig_corr = px.imshow(corr, text_auto=True, aspect="auto", title="Correlation Heatmap", color_continuous_scale="RdBu_r")
+        fig_corr.update_layout(template="plotly_dark", height=500)
+        st.plotly_chart(fig_corr, use_container_width=True)
+        
+        st.markdown("### 📈 Scatter Matrix (Pairplot)")
+        # Limit columns to max 5 for performance
+        cols_to_plot = numeric_df.columns[:min(5, len(numeric_df.columns))]
+        fig_splom = px.scatter_matrix(numeric_df, dimensions=cols_to_plot, title=f"Scatter Matrix (First {len(cols_to_plot)} Numeric Columns)")
+        fig_splom.update_layout(template="plotly_dark", height=800)
+        st.plotly_chart(fig_splom, use_container_width=True)
+    else:
+        st.info("Not enough numeric columns for multivariate correlation or pairplots.")
