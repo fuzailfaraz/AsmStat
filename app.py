@@ -43,7 +43,7 @@ def _build_linux_library(base_dir):
 
         # Link into shared library
         result = subprocess.run(
-            ["ld", "-shared", "-o", lib_path, obj_path],
+            ["ld", "-shared", "-z", "noexecstack", "-o", lib_path, obj_path],
             capture_output=True, text=True, timeout=30
         )
         if result.returncode != 0:

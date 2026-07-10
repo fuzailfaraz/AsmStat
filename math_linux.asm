@@ -193,3 +193,6 @@ asm_dot_product:
     jnz .loop_dot
 .done_dot:
     ret
+
+; Mark the stack as non-executable (required by modern Linux security)
+section .note.GNU-stack noalloc noexec nowrite progbits
