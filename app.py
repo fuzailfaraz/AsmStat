@@ -391,6 +391,12 @@ def get_cli_path_status():
 cli_data, cli_file = load_cli_data()
 cli_default = ", ".join(str(x) for x in cli_data) if cli_data else "10, 20, 30, 40, 50, 60, 70, 80, 90"
 
+col_back, _ = st.columns([1, 5])
+with col_back:
+    if st.button("🏠 Back to Home", use_container_width=True):
+        st.session_state.nav_page = "🏠 Home"
+        st.rerun()
+
 tab_cli, tab1, tab2 = st.tabs(["🖥️ CLI Sync", "📝 Manual Input", "📂 CSV Upload"])
 
 manual_arr = None
