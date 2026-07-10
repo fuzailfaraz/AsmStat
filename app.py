@@ -11,7 +11,182 @@ import shutil
 
 st.set_page_config(page_title="AsmStat Pro", layout="wide", initial_sidebar_state="collapsed")
 
+st.markdown("""
+<style>
+/* Modern typography */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
 
+html, body, [class*="css"]  {
+    font-family: 'Outfit', sans-serif !important;
+}
+
+/* Background gradient for the whole app */
+.stApp {
+    background: linear-gradient(135deg, #020617 0%, #1e1b4b 50%, #0f172a 100%);
+    color: #f8fafc;
+}
+
+/* Hide streamlit header and footer */
+header {visibility: hidden;}
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+
+/* Glassmorphism Metric Cards */
+.metric-box {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 24px;
+    margin: 10px 0px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.4s ease, box-shadow 0.4s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.metric-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    transition: left 0.5s ease;
+}
+.metric-box:hover::before {
+    left: 100%;
+}
+.metric-box:hover {
+    transform: translateY(-8px);
+    border-color: rgba(168, 85, 247, 0.5); /* Purple glow */
+    box-shadow: 0 15px 40px rgba(168, 85, 247, 0.25);
+    background: rgba(255, 255, 255, 0.05);
+}
+.metric-label {
+    font-size: 1.1rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+.metric-value {
+    font-size: 2.8rem;
+    color: #f8fafc;
+    font-weight: 800;
+    background: linear-gradient(135deg, #60a5fa, #a855f7, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+    line-height: 1.2;
+}
+
+/* Modernize tabs */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 12px;
+    background-color: transparent;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.stTabs [data-baseweb="tab"] {
+    background-color: rgba(255,255,255,0.02);
+    border-radius: 12px 12px 0 0;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-bottom: none;
+    padding: 12px 24px;
+    transition: all 0.3s ease;
+}
+.stTabs [data-baseweb="tab"]:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(180deg, rgba(168, 85, 247, 0.15) 0%, transparent 100%) !important;
+    border-top: 2px solid #a855f7 !important;
+    border-left: 1px solid rgba(168, 85, 247, 0.3) !important;
+    border-right: 1px solid rgba(168, 85, 247, 0.3) !important;
+}
+.stTabs [aria-selected="true"] p {
+    color: #e2e8f0 !important;
+    font-weight: 600 !important;
+}
+
+/* Styled text inputs and file uploaders */
+.stTextInput input, .stSelectbox > div > div {
+    background-color: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
+    color: white !important;
+    border-radius: 12px !important;
+    padding: 14px !important;
+    transition: all 0.3s ease;
+    font-family: 'Outfit', sans-serif;
+}
+.stTextInput input:focus, .stSelectbox > div > div:focus-within {
+    border-color: #a855f7 !important;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2) !important;
+    background-color: rgba(15, 23, 42, 0.8) !important;
+}
+
+/* Buttons */
+.stButton > button {
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+    background-size: 200% auto;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.6rem 2.5rem;
+    font-weight: 600;
+    transition: 0.5s;
+    box-shadow: 0 4px 15px 0 rgba(168, 85, 247, 0.4);
+    font-family: 'Outfit', sans-serif;
+}
+.stButton > button:hover {
+    background-position: right center; /* trigger gradient animation */
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.6);
+    color: white;
+}
+
+/* Dataframe glass effect */
+[data-testid="stDataFrame"] {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+}
+
+/* Headings */
+h1, h2, h3 {
+    background: linear-gradient(90deg, #f8fafc, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800 !important;
+    letter-spacing: -0.5px;
+}
+
+/* Dividers */
+hr {
+    border-color: rgba(255,255,255,0.08);
+    margin: 3rem 0;
+}
+
+/* Streamlit specific hide main padding top */
+.css-18e3th9 {
+    padding-top: 2rem;
+}
+.block-container {
+    padding-top: 2rem;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Custom Animated Header
+st.markdown("""
+<div style='text-align: center; padding: 3rem 0; margin-bottom: 2.5rem; background: rgba(255,255,255,0.02); border-radius: 24px; border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.3);'>
+    <h1 style='font-size: 4rem; margin-bottom: 0; background: linear-gradient(90deg, #3b82f6, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; letter-spacing: -1px;'>AsmStat Pro</h1>
+    <p style='color: #94a3b8; font-size: 1.2rem; margin-top: 10px; font-weight: 300; letter-spacing: 1px;'>HIGH-PERFORMANCE ASSEMBLY-POWERED DATA SCIENCE ENGINE</p>
+</div>
+""", unsafe_allow_html=True)
 
 def _build_linux_library(base_dir):
     """Compile math_linux.asm → libmath.so on Linux (Streamlit Cloud)."""
