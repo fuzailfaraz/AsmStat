@@ -6,8 +6,55 @@ import plotly.express as px
 import plotly.graph_objects as go
 import os
 import platform
+import subprocess
+import shutil
 
 st.set_page_config(page_title="AsmStat Pro", layout="wide", initial_sidebar_state="collapsed")
+
+
+
+def _build_linux_library(base_dir):
+    """Compile math_linux.asm → libmath.so on Linux (Streamlit Cloud)."""
+    asm_src = os.path.join(base_dir, "math_linux.asm")
+    obj_path = os.path.join(base_dir, "math_linux.o")
+    lib_path = os.path.join(base_dir, "libmath.so")
+
+    if not os.path.exists(asm_src):
+        st.error("❌ `math_linux.asm` not found — cannot compile on Linux.")
+        return None
+
+    # Check that nasm and ld are available
+    if not shutil.which("nasm"):
+        st.error("❌ `nasm` not installed. Add it to `packages.txt`.")
+        return None
+    if not shutil.which("ld"):
+        st.error("❌ `ld` (linker) not installed. Add `binutils` to `packages.txt`.")
+        return None
+
+    try:
+        # Assemble
+        result = subprocess.run(
+            ["nasm", "-f", "elf64", asm_src, "-o", obj_path],
+            capture_output=True, text=True, timeout=30
+        )
+        if result.returncode != 0:
+            st.error(f"❌ NASM assembly failed:\n```\n{result.stderr}\n```")
+            return None
+
+        # Link into shared library
+        result = subprocess.run(
+            ["ld", "-shared", "-o", lib_path, obj_path],
+            capture_output=True, text=True, timeout=30
+        )
+        if result.returncode != 0:
+            st.error(f"❌ Linking failed:\n```\n{result.stderr}\n```")
+            return None
+
+        return lib_path
+    except Exception as e:
+        st.error(f"❌ Build error: {e}")
+        return None
+
 
 @st.cache_resource
 def load_asm_library():
@@ -17,8 +64,15 @@ def load_asm_library():
     else:
         lib_path = os.path.join(base_dir, "libmath.so")
 
+    # On Linux, compile from source if the .so doesn't exist yet
+    if not os.path.exists(lib_path) and platform.system() != "Windows":
+        lib_path = _build_linux_library(base_dir)
+        if lib_path is None:
+            return None
+
     if not os.path.exists(lib_path):
         return None
+
     try:
         lib = ctypes.CDLL(lib_path)
 
@@ -46,7 +100,7 @@ def load_asm_library():
 asm_lib = load_asm_library()
 
 if asm_lib is None:
-    st.error("⚠️ Assembly library not found. On Windows: run build.bat → math.dll. On Linux: postBuild builds libmath.so.")
+    st.error("⚠️ Assembly library not found. On Windows: run build.bat → math.dll. On Linux: ensure nasm + binutils are in packages.txt.")
     st.stop()
 
 
