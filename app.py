@@ -386,35 +386,52 @@ with tab1:
         st.error("Invalid input! Please enter only valid integers separated by commas.")
 
 with tab2:
-    st.markdown("### 📊 Upload a CSV Dataset")
-    uploaded_file = st.file_uploader("Upload CSV (must contain numeric columns)", type=["csv"])
+    st.markdown("### 📊 Upload a Dataset (CSV/Excel)")
+    uploaded_file = st.file_uploader("Upload Dataset (must contain numeric columns)", type=["csv", "xlsx", "xls"])
     if uploaded_file is not None:
         try:
-            df = pd.read_csv(uploaded_file)
-            st.write("Preview of Dataset:", df.head())
-            numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
-            if not numeric_cols:
-                st.error("No numeric columns found in the dataset.")
+            filename = uploaded_file.name.lower()
+            if filename.endswith(".csv"):
+                # Try multiple encodings for robustness
+                encodings_to_try = ['utf-8', 'latin1', 'iso-8859-1', 'cp1252']
+                df = None
+                for enc in encodings_to_try:
+                    try:
+                        uploaded_file.seek(0)
+                        df = pd.read_csv(uploaded_file, encoding=enc)
+                        break
+                    except Exception:
+                        continue
+                if df is None:
+                    st.error("Failed to decode the CSV file with standard encodings (utf-8, latin1, cp1252).")
             else:
-                selected_col = st.selectbox("Select a column to analyze:", numeric_cols)
-                # Drop NaNs and convert to int64 for Assembly
-                csv_arr = df[selected_col].dropna().astype(np.int64).values
-                
-                # Check for second column for dot product
-                if len(numeric_cols) > 1:
-                    st.markdown("#### ✖️ Dot Product")
-                    col2_sel = st.selectbox("Select a second column for Dot Product (must be same length):", ["None"] + numeric_cols)
-                    if col2_sel != "None":
-                        arr2 = df[col2_sel].dropna().astype(np.int64).values
-                        if len(arr2) == len(csv_arr):
-                            c_arr1 = csv_arr.ctypes.data_as(ctypes.POINTER(ctypes.c_longlong))
-                            c_arr2 = arr2.ctypes.data_as(ctypes.POINTER(ctypes.c_longlong))
-                            dp_val = asm_lib.asm_dot_product(c_arr1, c_arr2, len(csv_arr))
-                            st.success(f"**Dot Product Result:** {dp_val}")
-                        else:
-                            st.warning("Columns must be of the same length to calculate dot product.")
+                df = pd.read_excel(uploaded_file)
+            
+            if df is not None:
+                st.write("Preview of Dataset:", df.head())
+                numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
+                if not numeric_cols:
+                    st.error("No numeric columns found in the dataset.")
+                else:
+                    selected_col = st.selectbox("Select a column to analyze:", numeric_cols)
+                    # Drop NaNs and convert to int64 for Assembly
+                    csv_arr = df[selected_col].dropna().astype(np.int64).values
+                    
+                    # Check for second column for dot product
+                    if len(numeric_cols) > 1:
+                        st.markdown("#### ✖️ Dot Product")
+                        col2_sel = st.selectbox("Select a second column for Dot Product (must be same length):", ["None"] + numeric_cols)
+                        if col2_sel != "None":
+                            arr2 = df[col2_sel].dropna().astype(np.int64).values
+                            if len(arr2) == len(csv_arr):
+                                c_arr1 = csv_arr.ctypes.data_as(ctypes.POINTER(ctypes.c_longlong))
+                                c_arr2 = arr2.ctypes.data_as(ctypes.POINTER(ctypes.c_longlong))
+                                dp_val = asm_lib.asm_dot_product(c_arr1, c_arr2, len(csv_arr))
+                                st.success(f"**Dot Product Result:** {dp_val}")
+                            else:
+                                st.warning("Columns must be of the same length to calculate dot product.")
         except Exception as e:
-            st.error(f"Error reading CSV: {e}")
+            st.error(f"Error reading dataset: {e}")
 
 arr = None
 length = 0
