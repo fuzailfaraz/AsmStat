@@ -64,11 +64,20 @@ def load_asm_library():
     else:
         lib_path = os.path.join(base_dir, "libmath.so")
 
-    # On Linux, compile from source if the .so doesn't exist yet
-    if not os.path.exists(lib_path) and platform.system() != "Windows":
-        lib_path = _build_linux_library(base_dir)
-        if lib_path is None:
-            return None
+    # On Linux, compile from source if the .so is missing or stale
+    if platform.system() != "Windows":
+        asm_src = os.path.join(base_dir, "math_linux.asm")
+        needs_build = not os.path.exists(lib_path)
+        if not needs_build and os.path.exists(asm_src):
+            # Rebuild if the .asm source is newer than the compiled .so
+            needs_build = os.path.getmtime(asm_src) > os.path.getmtime(lib_path)
+        if needs_build:
+            # Remove stale .so if it exists
+            if os.path.exists(lib_path):
+                os.remove(lib_path)
+            lib_path = _build_linux_library(base_dir)
+            if lib_path is None:
+                return None
 
     if not os.path.exists(lib_path):
         return None
