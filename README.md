@@ -22,17 +22,17 @@ The modern iteration of the project utilizes a high-performance **64-bit Assembl
 ### How to Run:
 1. Ensure you have NASM and GCC/ld installed.
 2. Run the build script to compile the Windows library (optional on Linux as it compiles at runtime):
-   ```bash
+```bash
    build.bat
-   ```
+```
 3. Install the Python requirements:
-   ```bash
+```bash
    pip install -r requirements.txt
-   ```
+```
 4. Launch the Streamlit web application:
-   ```bash
+```bash
    streamlit run app.py
-   ```
+```
 
 ---
 
