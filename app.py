@@ -188,6 +188,42 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+with st.sidebar:
+    st.markdown("## 🧭 Navigation")
+    page = st.radio("", ["🏠 Home", "📊 Analytics Engine"], label_visibility="collapsed")
+
+if page == "🏠 Home":
+    st.markdown("""
+    <div style='text-align: center; margin-top: 1rem;'>
+        <h2 style='font-size: 2.8rem; color: #f8fafc; font-weight: 800; margin-bottom: 1rem;'>Welcome to AsmStat Pro</h2>
+        <p style='font-size: 1.25rem; color: #94a3b8; max-width: 800px; margin: 0 auto; line-height: 1.6;'>
+            The world's first hybrid data science platform combining the raw processing power of <strong>64-bit Assembly Language</strong> with the visual elegance of modern Python analytics.
+        </p>
+    </div>
+    <div style='display: flex; justify-content: center; gap: 2rem; margin-top: 4rem; flex-wrap: wrap;'>
+        <div class='metric-box' style='width: 320px; padding: 2rem;'>
+            <div style='font-size: 3rem; margin-bottom: 1rem;'>⚡</div>
+            <h3 style='font-size: 1.5rem; color: #f8fafc; margin-bottom: 1rem;'>Assembly Core</h3>
+            <p style='color: #94a3b8; font-size: 1rem; line-height: 1.5; margin: 0; font-weight: normal !important;'>Computes statistical metrics (Sum, Mean, Variance) at hardware speeds using custom System V AMD64 Assembly.</p>
+        </div>
+        <div class='metric-box' style='width: 320px; padding: 2rem;'>
+            <div style='font-size: 3rem; margin-bottom: 1rem;'>📊</div>
+            <h3 style='font-size: 1.5rem; color: #f8fafc; margin-bottom: 1rem;'>Python Analytics</h3>
+            <p style='color: #94a3b8; font-size: 1rem; line-height: 1.5; margin: 0; font-weight: normal !important;'>Beautiful interactive visualizations with Plotly, correlation matrices, missing value detection, and full EDA.</p>
+        </div>
+        <div class='metric-box' style='width: 320px; padding: 2rem;'>
+            <div style='font-size: 3rem; margin-bottom: 1rem;'>🖥️</div>
+            <h3 style='font-size: 1.5rem; color: #f8fafc; margin-bottom: 1rem;'>EMU8086 Sync</h3>
+            <p style='color: #94a3b8; font-size: 1rem; line-height: 1.5; margin: 0; font-weight: normal !important;'>Live data synchronization with your 16-bit EMU8086 emulator. Push data from DOS directly into modern UI.</p>
+        </div>
+    </div>
+    
+    <div style='text-align: center; margin-top: 5rem;'>
+        <p style='color: #64748b; font-size: 1rem;'>👈 Select <strong>Analytics Engine</strong> from the sidebar to begin.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    st.stop()
+
 def _build_linux_library(base_dir):
     """Compile math_linux.asm → libmath.so on Linux (Streamlit Cloud)."""
     asm_src = os.path.join(base_dir, "math_linux.asm")
