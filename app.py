@@ -627,6 +627,36 @@ if df is not None:
     else:
         st.success("No missing values found in the uploaded dataset! ✨")
 
+    st.markdown("### 🎯 Individual Column Deep-Dive Analysis")
+    numeric_df = df.select_dtypes(include=np.number)
+    numeric_columns = numeric_df.columns.tolist()
+    if numeric_columns:
+        deep_col = st.selectbox("Select a column to analyze its detailed statistics:", numeric_columns, key="eda_col_select")
+        col_data = df[deep_col].dropna()
+        
+        # Calculate stats
+        col_sum = col_data.sum()
+        col_mean = col_data.mean()
+        col_var = col_data.var()
+        col_std = col_data.std()
+        col_min = col_data.min()
+        col_max = col_data.max()
+        
+        def safe_fmt(val):
+            return f"{val:,.2f}" if isinstance(val, (int, float)) else str(val)
+
+        c1, c2, c3, c4 = st.columns(4)
+        c1.markdown(f'<div class="metric-box"><p class="metric-label">SUM</p><p class="metric-value" style="font-size:2rem;">{safe_fmt(col_sum)}</p></div>', unsafe_allow_html=True)
+        c2.markdown(f'<div class="metric-box"><p class="metric-label">MEAN</p><p class="metric-value" style="font-size:2rem;">{safe_fmt(col_mean)}</p></div>', unsafe_allow_html=True)
+        c3.markdown(f'<div class="metric-box"><p class="metric-label">VARIANCE</p><p class="metric-value" style="font-size:2rem;">{safe_fmt(col_var)}</p></div>', unsafe_allow_html=True)
+        c4.markdown(f'<div class="metric-box"><p class="metric-label">STD DEV</p><p class="metric-value" style="font-size:2rem;">{safe_fmt(col_std)}</p></div>', unsafe_allow_html=True)
+        
+        c5, c6, c7, c8 = st.columns(4)
+        c5.markdown(f'<div class="metric-box"><p class="metric-label">MIN</p><p class="metric-value" style="font-size:2rem;">{safe_fmt(col_min)}</p></div>', unsafe_allow_html=True)
+        c6.markdown(f'<div class="metric-box"><p class="metric-label">MAX</p><p class="metric-value" style="font-size:2rem;">{safe_fmt(col_max)}</p></div>', unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+
     st.markdown("### 🧮 Numeric Feature Correlation")
     numeric_df = df.select_dtypes(include=np.number)
     if len(numeric_df.columns) > 1:
